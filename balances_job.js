@@ -1,23 +1,23 @@
-require('dotenv').config()
+require('dotenv').config();
 const pooling = require('./pooling.js');
 const util = require('util');
 const fs = require('fs');
 const readFile = util.promisify(fs.readFile);
-const kucoin_api = require('./kucoin-node-api/kucoin')
-const utc = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 const logger = require('./logger').logger;
+const get_balances = require('./get_balances.js');
 
 
 let pool;
 const doMain = async () => {
   try {
 
-    
-    pool = pool || await pooling.getPool();
-    let conn = await pool.getConnection();
-   
 
-   
+
+    pool = pool || await pooling.getPool();
+    const conn = await pool.getConnection();
+
+
+
     conn.query(await readFile('./CREATE_TABLE_BALANCES_JOB.sql', 'utf8'));
 
 
@@ -29,10 +29,22 @@ const doMain = async () => {
       let api = apis[i];
 
       if (api.exchange.toUpperCase() === "KUCOIN") {
-        balances = balances.concat(await getBalancesKucoin(api));
+        balances = balances.concat(await get_balances.Kucoin(api));
 
 
-      }
+      };
+
+      if (api.exchange.toUpperCase() === "LATOKEN") {
+        balances = balances.concat(await get_balances.LaToken(api));
+
+
+      };
+
+      if (api.exchange.toUpperCase() === "BITTREX") {
+        balances = balances.concat(await get_balances.Bittrex(api));
+
+
+      };
 
 
     };
@@ -42,19 +54,20 @@ const doMain = async () => {
     const insert = await conn.query(INSERT, [balances]);
     console.log(insert.affectedRows);
 
-    
+
     conn.query(await readFile('./balances_job.sql', 'utf8'));
     conn.query(await readFile('./CREATE_TABLE_overall_change_24h.sql', 'utf8'));
-    
+
 
     conn.release();
-    
+
 
     pool.end();
     logger.info(insert.affectedRows);
 
   }
   catch (err) {
+    console.log(err);
     logger.error(err);
   }
 
@@ -65,29 +78,7 @@ doMain();
 
 
 
-const getBalancesKucoin = async (api) => {
 
 
-  let config = {
-    apiKey: api.api_key,
-    secretKey: api.api_secret,
-    passphrase: api.api_passphrase,
-    environment: 'live',
-  }
-  kucoin_api.init(config);
 
 
-  let r = await kucoin_api.getAccounts();
-  var data = r.data;
-
-
-  const balances = [];
-
-  for (var i = 0; i < data.length; i++) {
-
-    balances.push([api.id_api, data[i].id, data[i].currency, data[i].balance, utc]);
-
-  }
-
-  return balances;
-}

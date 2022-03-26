@@ -25,28 +25,32 @@ balances_change_history.currency = MAX_inserted_before_24h.currency AND
 balances_change_history.inserted_at = MAX_inserted_before_24h.inserted_at
 );
 
-
 DROP TEMPORARY TABLE IF EXISTS balances_before_24h_x_balances_current;
 CREATE TEMPORARY TABLE balances_before_24h_x_balances_current
 AS
 (
 SELECT balances_current.id_api,
 balances_current.address, balances_current.currency, 
-balances_before_24h.balance AS balance_before_24, balances_current.balance AS balance_current
 
+CASE
+WHEN balances_before_24h.balance IS NULL THEN 0
+ELSE balances_before_24h.balance
+END AS balance_before_24h,
 
-FROM balances_before_24h INNER JOIN balances_current ON
+balances_current.balance AS balance_current
+
+FROM balances_current LEFT JOIN balances_before_24h ON
 balances_before_24h.id_api = balances_current.id_api AND
 balances_before_24h.address = balances_current.address AND 
 balances_before_24h.currency = balances_current.currency
-);
 
+);
 
 DROP TEMPORARY TABLE IF EXISTS overall_before_24h_x_overall_current;
 CREATE TEMPORARY TABLE overall_before_24h_x_overall_current
 AS
 (
-SELECT currency, SUM(balance_before_24) AS overall_before_24h, SUM(balance_current) AS overall_current 
+SELECT currency, SUM(balance_before_24h) AS overall_before_24h, SUM(balance_current) AS overall_current 
 FROM balances_before_24h_x_balances_current GROUP BY currency
 
 );
@@ -63,9 +67,12 @@ CREATE TABLE `overall_change_24h` (
 
 INSERT INTO overall_change_24h (currency, overall_before_24h, overall_current, change_24h)
 
-SELECT currency, overall_before_24h, overall_current, CASE
-					WHEN overall_before_24h = 0 THEN 0
-				 ELSE (overall_current/overall_before_24h - 1) * 100 
-				 END AS overall_change_24h 
+SELECT currency, overall_before_24h, overall_current, 
+
+CASE
+WHEN (overall_before_24h = 0 AND overall_current > 0) THEN 100
+WHEN (overall_before_24h = 0 AND overall_current = 0) THEN 0
+ELSE (overall_current/overall_before_24h - 1) * 100 
+END AS overall_change_24h 
 
 FROM overall_before_24h_x_overall_current;

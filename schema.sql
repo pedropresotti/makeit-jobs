@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS balances_change_history;
 ##  `customer_name` varchar(45) DEFAULT NULL,
 ##  `exchange` varchar(45) DEFAULT NULL,
  ## `api_key` varchar(45) DEFAULT NULL,
-##  `api_secret` varchar(45) DEFAULT NULL,
+##  `api_secret` varchar(100) DEFAULT NULL,
 ##  `api_passphrase` varchar(45) DEFAULT NULL,
 ##  PRIMARY KEY (`id_api`)
 ##);
