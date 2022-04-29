@@ -1091,6 +1091,7 @@ module.exports = class kucoin extends Exchange {
         //         ]
         //     }
         //
+		//return response;
         const data = this.safeValue (response, 'data', {});
         const timestamp = this.safeInteger (data, 'time');
         const orderbook = this.parseOrderBook (data, symbol, timestamp, 'bids', 'asks', level - 2, level - 1);
@@ -1482,6 +1483,7 @@ module.exports = class kucoin extends Exchange {
         //         ]
         //     }
         //
+		//return response;
         const data = this.safeValue (response, 'data', {});
         let trades = undefined;
         if (parseResponseData) {
@@ -1506,6 +1508,7 @@ module.exports = class kucoin extends Exchange {
         //     request['pageSize'] = limit;
         // }
         const response = await this.publicGetMarketHistories (this.extend (request, params));
+		return response;
         //
         //     {
         //         "code": "200000",
@@ -1989,6 +1992,7 @@ module.exports = class kucoin extends Exchange {
             'type': type,
         };
         const response = await this.privateGetAccounts (this.extend (request, params));
+		return response;
         //
         //     {
         //         "code":"200000",

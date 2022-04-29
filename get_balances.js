@@ -1,8 +1,45 @@
 const kucoin_api = require('./apis/kucoin-node-api/kucoin')
 const utc = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-const logger = require('./logger').logger;
 const ccxt = require('./apis/ccxt-master/ccxt.js');
 const BigNumber = require('bignumber.js');
+
+
+
+
+const doMain = async (apis) => {
+
+    let balances = [];
+
+    for (let i = 0; i < apis.length; i++) {
+
+        let api = apis[i];
+
+        if (api.exchange.toUpperCase() === "KUCOIN") {
+            balances = balances.concat(await getBalances_Kucoin(api));
+
+
+        };
+
+        if (api.exchange.toUpperCase() === "LATOKEN") {
+            balances = balances.concat(await getBalances_LaToken(api));
+
+
+        };
+
+        if (api.exchange.toUpperCase() === "BITTREX") {
+            balances = balances.concat(await getBalances_Bittrex(api));
+
+
+        };
+
+
+    };
+
+    return balances;
+
+
+}
+
 
 const getBalances_LaToken = async (api) => {
 
@@ -19,7 +56,7 @@ const getBalances_LaToken = async (api) => {
 
         const data = await exchange.fetchBalance();
 
-        
+
 
         for (let i = 0; i < data.length; i++) {
 
@@ -27,7 +64,7 @@ const getBalances_LaToken = async (api) => {
             balances.push([api.id_api, data[i].id, data[i].currency, total, utc]);
         };
 
-        
+
 
 
 
@@ -88,13 +125,7 @@ const getBalances_Bittrex = async (api) => {
 };
 
 
-
-
-
-module.exports.Kucoin = getBalances_Kucoin;
-module.exports.LaToken = getBalances_LaToken;
-module.exports.Bittrex = getBalances_Bittrex;
-
+module.exports.doMain = doMain;
 
 
 

@@ -1272,6 +1272,7 @@ module.exports = class bittrex extends Exchange {
             request['marketSymbol'] = market['base'] + '-' + market['quote'];
         }
         const response = await this.privateGetOrdersClosed (this.extend (request, params));
+		//return response;
         const orders = this.parseOrders (response, market);
         const trades = this.ordersToTrades (orders);
         return this.filterBySymbolSinceLimit (trades, symbol, since, limit);

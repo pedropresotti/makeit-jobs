@@ -1,4 +1,7 @@
-USE makeit;
+DELIMITER $$
+CREATE PROCEDURE `balances_job`()
+BEGIN
+SET autocommit=0;
 START TRANSACTION;
 ################################################
 ## balances_job is the temp table where the server_api_job dumps its data. 
@@ -64,6 +67,16 @@ balances_current.balance_changed_at < tmp_max.inserted_at
 AND balances_current.id > 0;
 ################################################
 
+
+
+
+
+
+
+
 DROP TABLE tmp_changed;
 DROP TABLE tmp_max;
 COMMIT;
+SET autocommit=1;
+END$$
+DELIMITER ;

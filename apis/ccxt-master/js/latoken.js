@@ -523,6 +523,7 @@ module.exports = class latoken extends Exchange {
         //         "totalBid":"112216.9029791"
         //     }
         //
+		return response;
         return this.parseOrderBook (response, symbol, undefined, 'bid', 'ask', 'price', 'quantity');
     }
 
@@ -816,6 +817,7 @@ module.exports = class latoken extends Exchange {
         //         }
         //     ]
         //
+		//return response;
         return this.parseTrades (response, market, since, limit);
     }
 
